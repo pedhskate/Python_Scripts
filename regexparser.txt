@@ -1,0 +1,21 @@
+import pandas as pd
+import re
+                        
+mylines = []                             
+with open ('target.txt', 'rb') as myfile: #MODIFY INPUT TEXT FILE
+    
+    try:
+        for myline in myfile:
+            #match = re.findall(r'REGEX', myline.decode()) #UNCOMMENT AFTER INPUT
+            if match != []:
+                mylines += match
+    except Exception as e:
+        print("Whoops!", e)
+        print(myline)
+        
+mylines = sorted(set(mylines))   
+           
+with open ('target_resultsforips.txt', 'w') as outfile: #MODIFY outfile
+    for line in mylines:
+        outfile.write(line + "\n")
+print(mylines)

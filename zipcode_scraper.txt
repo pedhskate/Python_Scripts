@@ -1,0 +1,73 @@
+# -*- coding: utf-8 -*-
+
+import time
+import pandas as pd
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+
+zipCodes = []
+complete = []
+
+# opening the file in read mode
+my_file = open("mailcodetest.txt", "r")
+      
+# reading the file
+data = my_file.read()
+      
+# replacing end splitting the text 
+# when newline ('\n') is seen.
+data_into_list = data.split("\n")
+my_file.close()
+    
+for i in data_into_list:
+    zipCodes.append(i)
+    
+counter = 0
+
+#executable path for chrome driver    
+driver = webdriver.Chrome(executable_path=r'C:\Users\tchaffin\Downloads\chromedriver_win32\chromedriver.exe')
+
+for zips in zipCodes:
+      
+    # Generating the url  
+    url = "https://www.google.com/search?q=longitude+and+latitude+for+" + zips
+    name = data_into_list[counter]
+    # name = names
+    counter +=1
+    # if counter%10 == 0:
+    #     time.sleep(2)
+    #try for the first variation of the url
+    try:        
+        time.sleep(2)
+        driver.get(url)
+        #check for white box address
+        element = driver.find_element_by_xpath("//div[@class='Z0LcW']")
+        coor = element.text
+        complete.append (
+            {
+                'Mail Code' : zips,
+                'Coordinates' : coor
+            }
+        )         
+    except NoSuchElementException:
+        complete.append (
+            {
+                'Mail Code' : zips,
+                'Coordinates' : "Coor not found"   
+            }
+        )
+    # if counter%25 == 0:
+    #     time.sleep(2)
+    
+#create dataframe    
+completed_df = pd.DataFrame(complete)
+
+# #print dataframes in python
+# print(completed_df)
+# print(unknown_df)
+
+#save dataframe as csv
+completed_df.to_csv('output.csv')
+
+print ("Complete.")
+

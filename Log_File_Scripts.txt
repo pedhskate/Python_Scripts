@@ -1,0 +1,140 @@
+************************************************
+
+Scripts used to filter Colbalt Strike log files. 
+
+************************************************
+
+WebLog Beacon Stager IPs
+
+grep -Eihr "beacon beacon" --include="weblog.log" | grep -Eiv "binary" | awk '{print $1}' | sort | uniq 
+
+
+------------------------------------
+
+
+EventLog Usernames Joined and Times
+
+grep -Ehir "joined" --include="events.log" | awk '{print $1","$2","$3","$5","$6}'
+
+
+------------------------------------
+
+
+Metadata External Beacon IPs
+
+grep -Eirh "\[metadata\]" --include="beacon*.log" | grep -Ei "<-" | sed 's/;/,/g' | awk '{ print $1","$2","$3","$4","$5","$6","$7}'
+
+
+------------------------------------
+
+
+Beacon Log partial target list
+
+grep -Eihr "\[input\]" --include="beacon*.log" | grep -Ei "note" | awk '{print $7}' | sort | uniq
+
+
+------------------------------------
+
+
+Beacon Log indicator tag parsing. File with hashes. 
+
+grep -Eirh "\[indicator\]" --include="beacon*.log" | grep -Ei "file" | grep -Eiv "service" | awk '{print $1","$2","$3","$4","$6","$7","$9}'
+
+
+------------------------------------
+
+
+Reverse HTTPS beacon information from Beacon logs. 
+
+grep -Eirh "\[task\]" | grep -Ev "sleep" | grep -Ei "reverse_http"
+
+
+------------------------------------
+
+
+Beacon Log IP addresses from metadata tags. 
+
+grep -Eirh "\[metadata\]" --include="beacon*.log" | grep -Ei "<-" | sed 's/;/,/g' | awk '{ print $5}' | sort | uniq
+
+
+*********************************************************
+
+
+Cobalt SSH Logs
+
+
+grep -Eihr "\[metadata\]" --include="ssh*.log" | awk '{print $1","$2","$3","$5","$6","$7}'
+
+
+*********************************************************
+
+
+Cobalt Beacon Logs
+
+
+grep -Eihr "\[indicator\]" --include="beacon*.log" | grep -Ev "service\:" | awk '{print $1","$2","$3","$6","$7","$9}'
+
+
+*********************************************************
+
+
+Cobalt Web Logs
+
+
+grep -Eirha "beacon beacon" --include="web*.log" | awk '{print $1","$4","$5","$6","$8","$10}' | sed 's/\[//g' | sed 's/\]//g'
+
+
+*********************************************************
+
+
+Cobalt Download Logs
+
+
+grep -Eirha "" --include="downloads.log" | awk '{print $1","$2","$3","$4","$5","$6","$7","$8","$9}'
+
+
+*********************************************************
+
+
+Cobalt Events Logs
+
+
+grep -Eirha "" --include="event*.log" | grep -E "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+
+********************************************
+
+IP Extraction Script:
+
+
+awk '{print $1}' access.log | sort | uniq
+
+
+********************************************
+
+Scripts used to extract data from log files.
+
+
+Event Logs (New SSH) Data:
+
+grep -Eira "" --include="event*.log" | grep -E "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" | grep -Ei "new ssh" | awk '{print $1","$2","$3","$8","$9","$10}' | sed 's/:/,/'
+
+
+Event Logs (Joined IPs):
+
+grep -Eira "" --include="event*.log" | grep -E "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" | grep -Ei "joined" | awk '{print $1","$2","$3","$5","$6}' | sed -e 's/(//g' -e 's/)//g' -e 's/:/,/'
+
+
+
+****************************************************
+
+Routable RHOST IP Addresses Script:
+
+grep -Ei "rhosts" history | grep -Eo "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" | sort | uniq | grep -Ev "^10.|^192.168.|^172\.1[6-9]|^172\.2[0-9]|^172\.3[0-1]" >> MSF4_RHOSTS_UniqIPs_Routable.txt 
+
+
+MSF4 Proxies Script: 
+
+grep -Ei "proxies" history | grep -Eo "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" | sort | uniq >> History_MSF4_Proxies.txt
+
+
+****************************************************

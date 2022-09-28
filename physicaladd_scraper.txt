@@ -1,0 +1,143 @@
+# -*- coding: utf-8 -*-
+"""
+"""
+
+import time
+import pandas as pd
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+
+companyNames = []
+completed_addresses = []
+unknown_addresses = []
+
+# opening the file in read mode
+my_file = open("CompanyNames.txt", "r")
+      
+# reading the file
+data = my_file.read()
+      
+# replacing end splitting the text 
+# when newline ('\n') is seen.
+data_into_list = data.split("\n")
+my_file.close()
+
+# formatting list to be put into a url
+for i in data_into_list:
+    j = i.replace(' ','+')
+    k = i.replace('"','')
+    companyNames.append(j)
+    
+counter = 0
+
+#executable path for chrome driver    
+driver = webdriver.Chrome(executable_path=r'C:\Users\tchaffin\Downloads\chromedriver_win32\chromedriver.exe')
+
+for names in companyNames:
+      
+    # Generating the url  
+    url = "https://google.com/search?q=" + names + "+hq+street+address"
+    url1 = "https://google.com/search?q=" + names + "+street+address"
+    url2 = "https://google.com/search?q=" + names + "+address"
+    name = data_into_list[counter]
+    # name = names
+    counter +=1
+    #try for the first variation of the url
+    try:        
+        driver.get(url)
+        #check for white box address
+        element = driver.find_element_by_xpath("//div[@class='sXLaOe']")
+        address = element.text
+        completed_addresses.append (
+            {
+                'Company Name': name,
+                'Address': address   
+            }
+        )         
+    except NoSuchElementException:
+        try: 
+            #check for baseball card address
+            element = driver.find_element_by_xpath("//span[@class='LrzXr']")
+            address = element.text
+            completed_addresses.append (
+                {
+                    'Company Name': name,
+                    'Address': address   
+                }
+            )    
+        except NoSuchElementException:
+            #try for the second variation of the url
+            try:        
+                time.sleep(2)
+                driver.get(url1)
+                #check for white box address
+                element = driver.find_element_by_xpath("//div[@class='sXLaOe']")
+                address = element.text
+                completed_addresses.append (
+                    {
+                        'Company Name': name,
+                        'Address': address   
+                    }
+                )         
+            except NoSuchElementException:
+                try: 
+                    #check for baseball card address
+                    element = driver.find_element_by_xpath("//span[@class='LrzXr']")
+                    address = element.text
+                    completed_addresses.append (
+                        {
+                            'Company Name': name,
+                            'Address': address   
+                        }
+                    )    
+                except NoSuchElementException:
+                    #try for the third variation of the url
+                    try:        
+                        time.sleep(2)
+                        driver.get(url2)
+                        #check for white box address
+                        element = driver.find_element_by_xpath("//div[@class='sXLaOe']")
+                        address = element.text
+                        completed_addresses.append (
+                            {
+                                'Company Name': name,
+                                'Address': address   
+                            }
+                        )         
+                    except NoSuchElementException:
+                        try: 
+                            #check for baseball card address
+                            element = driver.find_element_by_xpath("//span[@class='LrzXr']")
+                            address = element.text
+                            completed_addresses.append (
+                                {
+                                    'Company Name': name,
+                                    'Address': address   
+                                }
+                            )    
+                        except NoSuchElementException:
+                            completed_addresses.append (
+                                {
+                                    'Company Name': name,
+                                    'Address': "Address not found"   
+                                }
+                            )
+                            unknown_addresses.append (
+                                {
+                                    'Company Name': name,
+                                    }
+                            )
+    
+#create dataframe    
+completed_df = pd.DataFrame(completed_addresses)
+unknown_df = pd.DataFrame(unknown_addresses)
+
+# #print dataframes in python
+# print(completed_df)
+# print(unknown_df)
+
+#save dataframe as csv
+completed_df.to_csv('new_company_addresses.csv')
+unknown_df.to_csv('unknown_addresses.csv')
+
+print ("Complete.")
